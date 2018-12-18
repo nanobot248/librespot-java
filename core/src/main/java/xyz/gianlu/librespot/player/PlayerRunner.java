@@ -56,12 +56,18 @@ public class PlayerRunner implements Runnable {
         this.listener = listener;
         this.normalizationFactor = normalizationData.getFactor(configuration);
 
+        int mixerIndex = 0;
         LOGGER.info("Available mixers:");
+        int currentMixerIndex = 0;
         for (final Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
             LOGGER.debug("mixer: name=" + mixerInfo.getName() + ", vendor=" + mixerInfo.getVendor() + ", version=" + mixerInfo.getVersion() + ", description=" + mixerInfo.getDescription());
+            if (mixerInfo.getName() != null && mixerInfo.getName().contains("[default]")) {
+                mixerIndex = currentMixerIndex;
+            }
+            currentMixerIndex++;
         }
 
-        this.mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);
+        this.mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[mixerIndex]);
 
         this.joggSyncState.init();
         this.joggSyncState.buffer(BUFFER_SIZE);

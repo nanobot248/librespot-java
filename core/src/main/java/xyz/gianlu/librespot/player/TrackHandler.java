@@ -107,6 +107,11 @@ public class TrackHandler implements PlayerRunner.Listener, Closeable {
             if (play) playerRunner.play();
         } catch (PlayerRunner.PlayerException ex) {
             LOGGER.fatal("Failed starting playback!", ex);
+            Throwable cause;
+            while ((cause = ex.getCause()) != null) {
+                LOGGER.fatal("\nCaused by: ", ex);
+            }
+
             listener.loadingError(this, ex);
         }
     }

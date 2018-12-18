@@ -132,8 +132,15 @@ public class PlayerRunner implements Runnable {
         AudioFormat audioFormat = new AudioFormat((float) rate, 16, channels, true, false);
         DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat, AudioSystem.NOT_SPECIFIED);
 
-        if (!mixer.isLineSupported(dataLineInfo))
+        LOGGER.debug("audio format: rate=" + rate + ", channels=" + channels);
+        LOGGER.debug("data line info: " + dataLineInfo);
+        Mixer.Info mixerInfo = mixer.getMixerInfo();
+        LOGGER.debug("mixer: name=" + mixerInfo.getName() + ", vendor=" + mixerInfo.getVendor() + ", version=" + mixerInfo.getVersion() + ", description=" + mixerInfo.getDescription());
+
+        if (!mixer.isLineSupported(dataLineInfo)) {
+            LOGGER.debug("data line info not supported by mixer!");
             throw new PlayerException();
+        }
 
         try {
             outputLine = (SourceDataLine) mixer.getLine(dataLineInfo);

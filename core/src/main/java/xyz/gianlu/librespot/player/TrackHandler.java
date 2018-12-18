@@ -95,7 +95,15 @@ public class TrackHandler implements PlayerRunner.Listener, Closeable {
             throw new IOException("Couldn't skip 0xa7 bytes!");
 
         try {
-            if (playerRunner != null) playerRunner.stop();
+            if (playerRunner != null) {
+                playerRunner.stop();
+                while (!playerRunner.isCleanedUp()) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
             playerRunner = new PlayerRunner(audioStreaming, normalizationData, conf, this, track.getDuration());
             playerRunner.initController(session.spirc().deviceState());
             new Thread(playerRunner).start();

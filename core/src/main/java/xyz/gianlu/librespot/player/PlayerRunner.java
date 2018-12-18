@@ -49,6 +49,7 @@ public class PlayerRunner implements Runnable {
     private int[] pcmIndex;
     private volatile boolean playing = false;
     private volatile boolean stopped = false;
+    private volatile boolean cleanedUp = false;
 
     PlayerRunner(@NotNull AudioFileStreaming audioFile, @NotNull NormalizationData normalizationData,
                  @NotNull Player.PlayerConfiguration configuration, @NotNull Listener listener, int duration) throws IOException, PlayerException {
@@ -255,13 +256,20 @@ public class PlayerRunner implements Runnable {
     }
 
     private void cleanup() {
+        LOGGER.debug("cleaning up after run ...");
         joggStreamState.clear();
         jorbisBlock.clear();
         jorbisDspState.clear();
         jorbisInfo.clear();
         joggSyncState.clear();
+        mixer.close();
 
         LOGGER.trace("Cleaned up player.");
+        this.cleanedUp = true;
+    }
+
+    public boolean isCleanedUp() {
+        return cleanedUp;
     }
 
     @Override
@@ -326,6 +334,8 @@ public class PlayerRunner implements Runnable {
         Controller(@NotNull Line line) {
             if (line.isControlSupported(FloatControl.Type.MASTER_GAIN))
                 masterGain = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+            else if (line.isControlSupported(FloatControl.Type.VOLUME))
+                masterGain = (FloatControl) line.getControl(FloatControl.Type.VOLUME);
             else
                 masterGain = null;
         }
